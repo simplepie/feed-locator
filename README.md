@@ -3,7 +3,7 @@
 **Don't use this yet.**
 
 * https://github.com/simplepie/simplepie/blob/master/library/SimplePie/Locator.php
-* http://web.archive.org/web/20060327074802/http://diveintomark.org/archives/2003/01/22/parse_at_all_costs
+* https://web.archive.org/web/20100620085023/http://diveintomark.org/archives/2002/08/15/ultraliberal_rss_locator
 
 ## Coding Standards
 
