@@ -1,0 +1,61 @@
+{
+    "name": "simplepie/feed-locator",
+    "description": "Parse a webpage in an attempt to discover any supported feeds.",
+    "keywords": ["php", "rss", "atom", "json", "feed", "xml", "dublincore", "rdf", "simplepie", "ng"],
+    "type": "library",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Ryan Parman",
+            "homepage": "http://ryanparman.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/simplepie/feed-locator/issues"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=7.2",
+        "ext-curl": "*",
+        "ext-dom": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-libxml": "*",
+        "ext-mbstring": "*",
+        "ext-pcre": "*",
+        "ext-SPL": "*",
+        "lib-curl": "*",
+        "lib-ICU": "*",
+        "lib-libxml": "*",
+        "lib-pcre": "*",
+        "guzzlehttp/psr7": "^1.5",
+        "psr/log": "^1.1",
+        "skyzyx/utility-pack": "^1.0"
+    },
+    "require-dev": {
+        "codeclimate/php-test-reporter": "*@dev",
+        "friendsofphp/php-cs-fixer": "^2.14",
+        "mamuz/php-dependency-analysis": "dev-master",
+        "monolog/monolog": "^1.24",
+        "pdepend/pdepend": "^2.5",
+        "php-coveralls/php-coveralls": "^2.0",
+        "phploc/phploc": "^4.0",
+        "phpmetrics/phpmetrics": "^2.2",
+        "phpunit/phpunit": "^8.1",
+        "sebastian/phpcpd": "^4.0",
+        "squizlabs/php_codesniffer": "dev-master",
+        "twig/twig": "^2.9",
+        "wapmorgan/php-code-analyzer": "^1.0"
+    },
+    "config": {
+        "bin-dir": "bin/",
+        "optimize-autoloader": true
+    },
+    "autoload": {
+        "psr-4": {
+            "FeedLocator\\": "src/",
+            "FeedLocator\\Test\\": "tests/"
+        }
+    }
+}

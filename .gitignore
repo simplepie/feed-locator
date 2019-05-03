@@ -1,0 +1,10 @@
+.php_cs.cache
+.phpintel/
+.phpunit.result.cache
+bin/
+docs/_build/
+docs/_cache/
+reports/
+sandbox.php
+tests/report/
+vendor/
