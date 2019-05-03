@@ -12,6 +12,6 @@ namespace FeedLocator\Test\Unit;
 
 use FeedLocator\FeedLocator;
 
-class SimplePieTest extends AbstractTestCase
+class FeedLocatorTest extends AbstractTestCase
 {
 }
