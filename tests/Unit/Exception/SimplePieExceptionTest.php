@@ -13,7 +13,7 @@ namespace FeedLocator\Test\Unit\Exception;
 use FeedLocator\Exception\FeedLocatorException;
 use FeedLocator\Test\Unit\AbstractTestCase;
 
-class FeedLocatorExceptionTest extends AbstractTestCase
+class SimplePieExceptionTest extends AbstractTestCase
 {
     public function testThrow(): void
     {
