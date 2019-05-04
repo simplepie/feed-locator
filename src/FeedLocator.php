@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Ryan Parman <http://ryanparman.com>.
+ * Copyright (c) 2019 Ryan Parman <https://ryanparman.com>.
  * Copyright (c) 2019 Contributors.
  *
  * http://opensource.org/licenses/Apache2.0
@@ -10,9 +10,12 @@ declare(strict_types=1);
 
 namespace FeedLocator;
 
+use ArrayIterator;
 use FeedLocator\Mixin as Tr;
-use GuzzleHttp\Psr7;
-use Psr\Log\LoggerInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Promise as func;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -31,47 +34,73 @@ use Psr\Log\NullLogger;
  */
 class FeedLocator
 {
+    use Tr\GuzzleClientTrait;
     use Tr\LoggerTrait;
 
-    public $requestHandler;
+    /**
+     * An instantiated Guzzle 6 client object.
+     *
+     * @var Client
+     */
+    protected $client;
+
+    /**
+     * The number of parallel threads to use.
+     *
+     * @var int
+     */
+    protected $concurrency;
+
+    /**
+     * The queue object which holds references to the work tasks which still need to be performed.
+     *
+     * @var ArrayIterator
+     */
+    protected $queue;
 
     /**
      * Constructs a new instance of this class.
+     *
+     * @param string      $uri         The URI on which to begin the auto-discovery scanning.
+     * @param int|null    $concurrency The number of parallel threads to use. Should be equal to, or fewer than, the
+     *                                 number of CPU cores running the code.
+     * @param Client|null $client      An instantiated Guzzle 6 client object.
      */
-    public function __construct()
+    public function __construct(string $uri, int $concurrency = 5, Client $client = null)
     {
-        // Default logger
-        $this->logger = new NullLogger();
-    }
+        $this->logger      = new NullLogger();
+        $this->concurrency = $concurrency;
+        $this->queue       = func\iter_for($uri);
 
-    public function setLogger(LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    public function setRequestHandler(?callable $fn = null): void
-    {
-        $this->requestHandler = $fn ?: static function () {
-            return true;
-        };
-    }
-
-    public function exec(): void
-    {
-        $responses = [];
-
-        $promise = ($this->requestHandler)($this->test(), $responses);
-        $promise->wait(false);
-
-        \print_r($responses);
-    }
-
-    private function test(): iterable
-    {
-        for ($i = 0; $i < 20; $i++) {
-            yield new Psr7\Request('GET', \sprintf('http://httpbin.org/anything/%d', $i));
+        if ($client) {
+            $this->client = $client;
+        } else {
+            $this->client = new Client([
+                RequestOptions::CONNECT_TIMEOUT => 1.0,
+                RequestOptions::TIMEOUT         => 1.0,
+                RequestOptions::HTTP_ERRORS     => false,
+                RequestOptions::STREAM          => true,
+            ]);
         }
+    }
+
+    public function run()
+    {
+        $generator = new Http\MapIterator(
+            $this->queue,
+            function (string $url, ArrayIterator $queue) {
+                return $this->client->getAsync($url)
+                    ->then(static function (ResponseInterface $response) use ($url, $queue): void {
+                        $hash = \bin2hex(\random_bytes(10));
+                        $queue->append(
+                            \sprintf('http://httpbin.org/anything/%s', $hash)
+                        );
+                    });
+            }
+        );
+
+        $generator = new Http\ExpectingIterator($generator);
+
+        return func\each_limit($generator, $this->concurrency);
     }
 }

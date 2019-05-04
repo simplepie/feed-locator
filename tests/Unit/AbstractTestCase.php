@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 Ryan Parman <http://ryanparman.com>.
+ * Copyright (c) 2019 Ryan Parman <https://ryanparman.com>.
  * Copyright (c) 2019 Contributors.
  *
  * http://opensource.org/licenses/Apache2.0
