@@ -18,19 +18,15 @@ use Psr\Http\Message\ResponseInterface;
 class AtomValidator extends AbstractValidator implements ValidatorInterface
 {
     /**
-     * Determines whether or not a PSR-7 `ResponseInterface` contains a RSS feed.
-     *
-     * @param ResponseInterface $response A PSR-7 `ResponseInterface` class.
+     * {@inheritdoc}
      */
-    public static function isFeed(ResponseInterface $response): bool
+    public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
-        /** @var \Psr\Http\Message\StreamInterface */
-        $body = $response->getBody();
+        if ($contentSniffing) {
+            return static::scanBodyFor($response, '%<feed\s?([^>]*)http://www.w3.org/2005/Atom([^>]*)>%im', 500);
+        }
 
-        /** @var string */
-        $firstBits = $body->read(500);
-        $body->rewind();
-
-        return (bool) \preg_match('%<feed\s?([^>]*)http://www.w3.org/2005/Atom([^>]*)>%im', $firstBits);
+        // `application/atom+xml`, `application/xml`, `text/xml`
+        return static::scanContentTypeFor($response, '%(application|text)/(atom\+)?xml%i');
     }
 }

@@ -18,19 +18,15 @@ use Psr\Http\Message\ResponseInterface;
 class JsonFeedValidator extends AbstractValidator implements ValidatorInterface
 {
     /**
-     * Determines whether or not a PSR-7 `ResponseInterface` contains a JSONFeed feed.
-     *
-     * @param ResponseInterface $response A PSR-7 `ResponseInterface` class.
+     * {@inheritdoc}
      */
-    public static function isFeed(ResponseInterface $response): bool
+    public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
-        /** @var \Psr\Http\Message\StreamInterface */
-        $body = $response->getBody();
+        if ($contentSniffing) {
+            return static::scanBodyFor($response, '%https://jsonfeed.org/version/1%im', 100);
+        }
 
-        /** @var string */
-        $firstBits = $body->read(100);
-        $body->rewind();
-
-        return (bool) \preg_match('%https://jsonfeed.org/version/1%im', $firstBits);
+        // `application/feed+json`, `application/json`
+        return static::scanContentTypeFor($response, '%application/(feed\+)?json%i');
     }
 }

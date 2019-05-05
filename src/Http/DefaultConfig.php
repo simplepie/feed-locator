@@ -13,6 +13,7 @@ namespace FeedLocator\Http;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
+use Skyzyx\UtilityPack\Bytes;
 
 class DefaultConfig
 {
@@ -36,7 +37,9 @@ class DefaultConfig
     {
         return static function (TransferStats $stats) use ($logger): void {
             $logger->info($stats->getEffectiveUri(), [
-                'time' => $stats->getTransferTime(),
+                'time'       => $stats->getTransferTime(),
+                'mem_script' => Bytes::format(\memory_get_usage()),
+                'mem_zend'   => Bytes::format(\memory_get_usage(true)),
             ]);
         };
     }

@@ -18,19 +18,15 @@ use Psr\Http\Message\ResponseInterface;
 class RdfValidator extends AbstractValidator implements ValidatorInterface
 {
     /**
-     * Determines whether or not a PSR-7 `ResponseInterface` contains a RSS feed.
-     *
-     * @param ResponseInterface $response A PSR-7 `ResponseInterface` class.
+     * {@inheritdoc}
      */
-    public static function isFeed(ResponseInterface $response): bool
+    public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
-        /** @var \Psr\Http\Message\StreamInterface */
-        $body = $response->getBody();
+        if ($contentSniffing) {
+            return static::scanBodyFor($response, '%<rdf:RDF\s?([^>]*)http://purl.org/rss/1.0/([^>]*)>%im', 500);
+        }
 
-        /** @var string */
-        $firstBits = $body->read(500);
-        $body->rewind();
-
-        return (bool) \preg_match('%<rdf:RDF\s?([^>]*)http://purl.org/rss/1.0/([^>]*)>%im', $firstBits);
+        // `application/rdf+xml`, `application/rdf`, `application/xml`, `text/xml`, `text/rdf`
+        return static::scanContentTypeFor($response, '%(application|text)/(rdf\+xml|rdf|xml)%i');
     }
 }

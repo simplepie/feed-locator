@@ -18,19 +18,15 @@ use Psr\Http\Message\ResponseInterface;
 class RssValidator extends AbstractValidator implements ValidatorInterface
 {
     /**
-     * Determines whether or not a PSR-7 `ResponseInterface` contains a RSS feed.
-     *
-     * @param ResponseInterface $response A PSR-7 `ResponseInterface` class.
+     * {@inheritdoc}
      */
-    public static function isFeed(ResponseInterface $response): bool
+    public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
-        /** @var \Psr\Http\Message\StreamInterface */
-        $body = $response->getBody();
+        if ($contentSniffing) {
+            return static::scanBodyFor($response, '%<rss\s?([^>]*)>%im', 500);
+        }
 
-        /** @var string */
-        $firstBits = $body->read(500);
-        $body->rewind();
-
-        return (bool) \preg_match('%<rss\s?([^>]*)>%im', $firstBits);
+        // `application/rss+xml`, `application/xml`, `text/xml`
+        return static::scanContentTypeFor($response, '%(application|text)/(rss\+)?xml%i');
     }
 }

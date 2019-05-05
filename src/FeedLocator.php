@@ -77,7 +77,8 @@ class FeedLocator
         $handler = function (string $uri, ArrayIterator $queue) {
             return $this->client->getAsync($uri)
                 ->then(ValidFeed::isFeed($uri, $queue, $this->logger, $this->results))
-                ->then(null, static function ($reason): void {
+                ->then(static function (): void {
+                }, static function ($reason): void {
                     die($reason . \PHP_EOL);
                 });
         };
