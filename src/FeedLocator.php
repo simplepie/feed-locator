@@ -12,10 +12,7 @@ namespace FeedLocator;
 
 use ArrayIterator;
 use FeedLocator\Mixin as Tr;
-use GuzzleHttp\Client;
-use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Promise as func;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -37,12 +34,14 @@ class FeedLocator
     use Tr\GuzzleClientTrait;
     use Tr\LoggerTrait;
 
+    public $count = 0;
+
     /**
-     * An instantiated Guzzle 6 client object.
+     * The results object which holds the results of the work tasks which have already been performed.
      *
-     * @var Client
+     * @var ArrayIterator
      */
-    protected $client;
+    public $results;
 
     /**
      * The number of parallel threads to use.
@@ -61,46 +60,36 @@ class FeedLocator
     /**
      * Constructs a new instance of this class.
      *
-     * @param string      $uri         The URI on which to begin the auto-discovery scanning.
-     * @param int|null    $concurrency The number of parallel threads to use. Should be equal to, or fewer than, the
-     *                                 number of CPU cores running the code.
-     * @param Client|null $client      An instantiated Guzzle 6 client object.
+     * @param string   $uri         The URI on which to begin the auto-discovery scanning.
+     * @param int|null $concurrency The number of parallel threads to use. Should be equal to, or fewer than, the
+     *                              number of CPU cores running the code.
      */
-    public function __construct(string $uri, int $concurrency = 5, Client $client = null)
+    public function __construct(string $uri, int $concurrency = 1)
     {
         $this->logger      = new NullLogger();
         $this->concurrency = $concurrency;
         $this->queue       = func\iter_for($uri);
-
-        if ($client) {
-            $this->client = $client;
-        } else {
-            $this->client = new Client([
-                RequestOptions::CONNECT_TIMEOUT => 1.0,
-                RequestOptions::TIMEOUT         => 1.0,
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::STREAM          => true,
-            ]);
-        }
+        $this->results     = new ArrayIterator();
     }
 
     public function run()
     {
-        $generator = new Http\MapIterator(
-            $this->queue,
-            function (string $url, ArrayIterator $queue) {
-                return $this->client->getAsync($url)
-                    ->then(static function (ResponseInterface $response) use ($url, $queue): void {
-                        $hash = \bin2hex(\random_bytes(10));
-                        $queue->append(
-                            \sprintf('http://httpbin.org/anything/%s', $hash)
-                        );
-                    });
-            }
-        );
+        $handler = function (string $uri, ArrayIterator $queue) {
+            return $this->client->getAsync($uri)
+                ->then(Then::isFeed($uri, $queue, $this->logger, $this->results))
+                ->then(null, static function ($reason): void {
+                    die($reason . \PHP_EOL);
+                });
+        };
 
-        $generator = new Http\ExpectingIterator($generator);
+        $mapper    = new Http\MapIterator($this->queue, $handler);
+        $generator = new Http\ExpectingIterator($mapper);
 
         return func\each_limit($generator, $this->concurrency);
+    }
+
+    public function getResults(): ArrayIterator
+    {
+        return $this->results;
     }
 }
