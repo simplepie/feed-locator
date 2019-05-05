@@ -14,7 +14,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
 
-class Helper
+class DefaultConfig
 {
     /**
      * Default HandlerStack with pre-included middleware.

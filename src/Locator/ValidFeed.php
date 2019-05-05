@@ -19,7 +19,7 @@ use FeedLocator\Validator\RssValidator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
-class Then
+class ValidFeed
 {
     /**
      * Constructs a new instance of this class.

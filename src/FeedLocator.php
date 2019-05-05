@@ -41,7 +41,7 @@ class FeedLocator
      *
      * @var ArrayIterator
      */
-    public $results;
+    protected $results;
 
     /**
      * The number of parallel threads to use.
@@ -76,7 +76,7 @@ class FeedLocator
     {
         $handler = function (string $uri, ArrayIterator $queue) {
             return $this->client->getAsync($uri)
-                ->then(Then::isFeed($uri, $queue, $this->logger, $this->results))
+                ->then(ValidFeed::isFeed($uri, $queue, $this->logger, $this->results))
                 ->then(null, static function ($reason): void {
                     die($reason . \PHP_EOL);
                 });

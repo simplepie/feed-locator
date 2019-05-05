@@ -53,11 +53,13 @@ class ExpectingIterator implements Iterator
      */
     public function next(): void
     {
+        // phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedIf
         if (!$this->wasValid && $this->valid()) {
             // Just do nothing, because the inner iterator has became valid
         } else {
             $this->inner->next();
         }
+        // phpcs:enable
 
         $this->wasValid = $this->valid();
     }
