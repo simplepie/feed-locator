@@ -13,7 +13,7 @@ namespace FeedLocator\Http;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
-use Skyzyx\UtilityPack\Bytes;
+use SimplePie\UtilityPack\Util\Bytes;
 
 class DefaultConfig
 {

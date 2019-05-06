@@ -40,6 +40,13 @@ abstract class AbstractValidator
         return (bool) \preg_match($regex, $firstBits);
     }
 
+    /**
+     * Scans the content-type header of a PSR-7 response for a matching pattern.
+     *
+     * @param ResponseInterface $response A PSR-7 `ResponseInterface` class.
+     * @param string            $regex    A PCRE-compatible regular expression pattern meant to
+     *                                    positively-identify a feed.
+     */
     public static function scanContentTypeFor(ResponseInterface $response, string $regex): bool
     {
         $contentType = $response->getHeader('content-type');

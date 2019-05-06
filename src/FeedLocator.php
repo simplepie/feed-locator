@@ -14,6 +14,7 @@ use ArrayIterator;
 use FeedLocator\Mixin as Tr;
 use GuzzleHttp\Promise as func;
 use Psr\Log\NullLogger;
+use SimplePie\UtilityPack\Mixin as UpTr;
 
 /**
  * `FeedLocator\FeedLocator` is the primary entry point for Feed Locator.
@@ -32,7 +33,7 @@ use Psr\Log\NullLogger;
 class FeedLocator
 {
     use Tr\GuzzleClientTrait;
-    use Tr\LoggerTrait;
+    use UpTr\LoggerTrait;
 
     public $count = 0;
 

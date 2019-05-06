@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace FeedLocator\Mixin;
 
 use GuzzleHttp\Client;
-use Skyzyx\UtilityPack\Types;
+use SimplePie\UtilityPack\Util\Types;
 
 /**
  * Shared code for working with Guzzle clients.

@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 namespace FeedLocator\Enum;
 
+use SimplePie\UtilityPack\Enum\AbstractEnum;
+
 /**
  * Provides a set of known, allowable feed types.
  */
