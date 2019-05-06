@@ -52,7 +52,7 @@ class Html extends AbstractParser
 
         // Default libxml2 settings
         if (null === $libxml) {
-            $this->libxml = static::getDefaultConfig();
+            $this->libxml = static::getDefaultLibxmlConfig();
         }
 
         // Raw stream
