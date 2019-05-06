@@ -332,12 +332,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/simplepie/utility-pack.git",
-                "reference": "d3e478b17e264d6d5d4b19e225a3c5d19fa32247"
+                "reference": "eac6a4a1872e5860e309b96d2d3ec4c27333de20"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/simplepie/utility-pack/zipball/d3e478b17e264d6d5d4b19e225a3c5d19fa32247",
-                "reference": "d3e478b17e264d6d5d4b19e225a3c5d19fa32247",
+                "url": "https://api.github.com/repos/simplepie/utility-pack/zipball/eac6a4a1872e5860e309b96d2d3ec4c27333de20",
+                "reference": "eac6a4a1872e5860e309b96d2d3ec4c27333de20",
                 "shasum": ""
             },
             "require": {
@@ -384,7 +384,7 @@
                 "types",
                 "url"
             ],
-            "time": "2019-05-06T04:56:19+00:00"
+            "time": "2019-05-06T21:48:01+00:00"
         }
     ],
     "packages-dev": [

@@ -27,15 +27,9 @@ use SimplePie\UtilityPack\Parser\AbstractParser;
 class Html extends AbstractParser
 {
     use UpTr\DomDocumentTrait;
+    use UpTr\LibxmlTrait;
     use UpTr\LoggerTrait;
     use UpTr\RawDocumentTrait;
-
-    /**
-     * Bitwise libxml options to use for parsing XML.
-     *
-     * @var int
-     */
-    protected $libxml;
 
     /**
      * Constructs a new instance of this class.
@@ -58,15 +52,7 @@ class Html extends AbstractParser
 
         // Default libxml2 settings
         if (null === $libxml) {
-            $this->libxml = \LIBXML_HTML_NOIMPLIED // Required, or things crash.
-                | \LIBXML_BIGLINES
-                | \LIBXML_COMPACT
-                | \LIBXML_HTML_NODEFDTD
-                | \LIBXML_NOBLANKS
-                | \LIBXML_NOENT
-                | \LIBXML_NOXMLDECL
-                | \LIBXML_NSCLEAN
-                | \LIBXML_PARSEHUGE;
+            $this->libxml = static::getDefaultConfig();
         }
 
         // Raw stream
@@ -92,37 +78,6 @@ class Html extends AbstractParser
 
         // Clear the libxml errors to avoid excessive memory usage
         \libxml_clear_errors();
-    }
-
-    /**
-     * Sets the libxml value to use for parsing XML.
-     *
-     * @param int $libxml TODO add a description here.
-     *
-     * @return int
-     */
-    public function setLibxml(int $libxml)
-    {
-        $this->libxml = $libxml;
-
-        // What are the libxml2 configurations?
-        $this->logger->debug(\sprintf(
-            'Libxml configuration has a bitwise value of `%s`.%s',
-            $this->libxml,
-            (4792582 === $this->libxml)
-                ? ' (This is the default configuration.)'
-                : ''
-        ));
-
-        return $this;
-    }
-
-    /**
-     * Gets the libxml value to use for parsing XML.
-     */
-    public function getLibxml(): int
-    {
-        return $this->libxml;
     }
 
     /**
