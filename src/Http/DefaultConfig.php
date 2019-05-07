@@ -52,6 +52,7 @@ class DefaultConfig
     public static function clientOptions(LoggerInterface $logger): array
     {
         return [
+            'cookies'         => true,
             'connect_timeout' => 3.0,
             'timeout'         => 3.0,
             'http_errors'     => false,

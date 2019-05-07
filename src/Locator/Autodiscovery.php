@@ -59,7 +59,7 @@ class Autodiscovery
             $results = $parser->xpath()->query($query);
 
             $logger->debug($query, [
-                'matches' => count($results),
+                'matches' => \count($results),
             ]);
 
             foreach ($results as $result) {

@@ -12,6 +12,7 @@ namespace FeedLocator;
 
 use ArrayIterator;
 use FeedLocator\Locator\Autodiscovery;
+use FeedLocator\Locator\KnownGood;
 use FeedLocator\Locator\Scrape;
 use FeedLocator\Locator\ValidFeed;
 use FeedLocator\Mixin as Tr;
@@ -81,10 +82,10 @@ class FeedLocator
         $handler = function (string $uri, Queue $queue) {
             return $this->client->getAsync($uri)
                 ->then(ValidFeed::isFeed($uri, $queue, $this->logger, $this->results))
+                ->then(KnownGood::parse($uri, $queue, $this->logger))
                 ->then(Autodiscovery::parse($uri, $queue, $this->logger))
                 ->then(Scrape::parse($uri, $queue, $this->logger))
-                ->otherwise(static::handleReject())
-            ;
+                ->otherwise(static::handleReject());
         };
 
         $mapper    = new Http\MapIterator($this->queue, $handler);
