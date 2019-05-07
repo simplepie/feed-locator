@@ -8,7 +8,7 @@
 
 declare(strict_types=1);
 
-namespace FeedLocator;
+namespace FeedLocator\Locator;
 
 use ArrayIterator;
 use FeedLocator\Enum as E;
@@ -16,8 +16,11 @@ use FeedLocator\Validator\AtomValidator;
 use FeedLocator\Validator\JsonFeedValidator;
 use FeedLocator\Validator\RdfValidator;
 use FeedLocator\Validator\RssValidator;
+use GuzzleHttp\Promise\FulfilledPromise;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use SimplePie\UtilityPack\Util\Types;
 
 class ValidFeed
 {
@@ -30,7 +33,11 @@ class ValidFeed
 
     public static function isFeed(string $uri, ArrayIterator $queue, LoggerInterface $logger, ArrayIterator &$results)
     {
-        return static function (ResponseInterface $response) use ($uri, $queue, $logger, $results): void {
+        $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
+
+        return static function (ResponseInterface $response) use ($uri, $queue, $logger, $results): PromiseInterface {
+            $logger->debug(\sprintf('The closure from `%s` is running.', __CLASS__));
+
             // Memoize these checks
             $typeCheck = [
                 'isAtom'     => AtomValidator::isFeed($response),
@@ -72,6 +79,8 @@ class ValidFeed
                     $contentType,
                 ]);
             }
+
+            return new FulfilledPromise($response);
         };
     }
 }

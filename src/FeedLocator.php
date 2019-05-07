@@ -11,6 +11,8 @@ declare(strict_types=1);
 namespace FeedLocator;
 
 use ArrayIterator;
+use FeedLocator\Locator\Autodiscovery;
+use FeedLocator\Locator\ValidFeed;
 use FeedLocator\Mixin as Tr;
 use GuzzleHttp\Promise as func;
 use Psr\Log\NullLogger;
@@ -77,11 +79,19 @@ class FeedLocator
     {
         $handler = function (string $uri, ArrayIterator $queue) {
             return $this->client->getAsync($uri)
-                ->then(ValidFeed::isFeed($uri, $queue, $this->logger, $this->results))
-                ->then(static function (): void {
-                }, static function ($reason): void {
-                    die($reason . \PHP_EOL);
-                });
+                ->then(
+                    ValidFeed::isFeed($uri, $queue, $this->logger, $this->results),
+                    static::handleReject()
+                )
+                ->then(
+                    Autodiscovery::parse($uri, $queue, $this->logger),
+                    static::handleReject()
+                )
+                ->then(
+                    null,
+                    static::handleReject()
+                )
+            ;
         };
 
         $mapper    = new Http\MapIterator($this->queue, $handler);
@@ -93,5 +103,12 @@ class FeedLocator
     public function getResults(): ArrayIterator
     {
         return $this->results;
+    }
+
+    protected static function handleReject(): callable
+    {
+        return static function (string $reason): void {
+            die($reason . \PHP_EOL);
+        };
     }
 }

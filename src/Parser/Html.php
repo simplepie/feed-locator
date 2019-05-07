@@ -65,13 +65,7 @@ class Html extends AbstractParser
         \libxml_use_internal_errors(true);
 
         // DOMDocument configuration
-        $this->domDocument->recover             = true;
-        $this->domDocument->formatOutput        = false;
-        $this->domDocument->preserveWhiteSpace  = false;
-        $this->domDocument->resolveExternals    = true;
-        $this->domDocument->substituteEntities  = true;
-        $this->domDocument->strictErrorChecking = false;
-        $this->domDocument->validateOnParse     = false;
+        $this->domDocument = $this->getDefaultDomConfig($this->domDocument);
 
         // Parse the XML document with the configured libxml options
         $this->domDocument->loadHTML($this->rawDocument, $this->libxml);
