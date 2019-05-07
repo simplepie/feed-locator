@@ -25,6 +25,7 @@
 * [X] Returns a list of results; each contains the feed URI, the format of the feed, and its server media type.
 * [ ] Will provide a CLI tool which accepts an input URI and can return a list of feeds.
 * [ ] Will support _offline/local_ mode where you can parse a local file, and receive "best-guess" matches.
+* [ ] Will support caching the results so that the next request for a URI will return the cached results instead of making live queries.
 
 ### Standards-Compliant
 
@@ -42,6 +43,62 @@
 Most of the important bits are working. Still tweaking the user-facing APIs. Need to refactor a few spots for DRY and just general efficiency. Need to write automated tests. Need to tune the log-levels. Still continues to perform some work after we already have what we need.
 
 We support [PSR-7], but for making the _actual_ requests, we (presently) have a hard dependency on [Guzzle 6 Async Pools](http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=GuzzleHttp\Pool) for purposes of speed and efficiency. Other possible adapters could be accepted once I create a pluggable framework for them.
+
+## Example Usage
+
+```php
+use FeedLocator\FeedLocator;
+use FeedLocator\Http\DefaultConfig;
+use FeedLocator\Locator\Autodiscovery;
+use GuzzleHttp\Client;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
+use Psr\Log\LogLevel;
+
+# Define our logger
+$logger = new Logger('FeedLocator');
+$logger->pushHandler(new ErrorLogHandler(
+    ErrorLogHandler::OPERATING_SYSTEM,
+    LogLevel::DEBUG,
+    true,
+    false
+));
+
+# Discover the status page feed for Firebase.
+$locator = new FeedLocator('https://status.firebase.google.com');
+
+# Use the default configuration, but tweak a few values.
+$options = DefaultConfig::clientOptions($logger);
+$options['connect_timeout'] = 10.0;
+$options['timeout']         = 10.0;
+
+# Set the logger and Guzzle client to use
+$locator->setLogger($logger);
+$locator->setGuzzleClient(new Client($options));
+
+# Run, using Guzzle Promises
+$pool = $locator->run();
+$pool->wait();
+
+# Get the results as an array (from an ArrayIterator)
+$results = $locator->getResults()->getArrayCopy();
+\print_r($results);
+```
+
+Output:
+
+```plain
+Array
+(
+    [0] => Array
+        (
+            [0] => https://status.firebase.google.com/feed.atom
+            [1] => atom
+            [2] => application/atom+xml
+        )
+
+)
+```
 
 ## Coding Standards
 
