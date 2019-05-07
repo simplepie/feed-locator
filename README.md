@@ -24,6 +24,7 @@
 * [X] Supports domain names without typing the `http://` or `https://`.
 * [X] Returns a list of results; each contains the feed URI, the format of the feed, and its server media type.
 * [ ] Will provide a CLI tool which accepts an input URI and can return a list of feeds.
+* [ ] Will support _offline/local_ mode where you can parse a local file, and receive "best-guess" matches.
 
 ### Standards-Compliant
 
