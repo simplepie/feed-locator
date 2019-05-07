@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 namespace FeedLocator\Locator;
 
-use ArrayIterator;
 use FeedLocator\Parser\Html as HtmlParser;
+use FeedLocator\Queue;
 use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Uri;
@@ -37,10 +37,10 @@ class Autodiscovery
      * [parse description].
      *
      * @param string          $uri    [description]
-     * @param ArrayIterator   $queue  [description]
+     * @param Queue           $queue  [description]
      * @param LoggerInterface $logger [description]
      */
-    public static function parse(string $uri, ArrayIterator $queue, LoggerInterface $logger): callable
+    public static function parse(string $uri, Queue $queue, LoggerInterface $logger): callable
     {
         $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
 
@@ -52,10 +52,15 @@ class Autodiscovery
             $effectiveUri = new Uri($effectiveUri);
 
             $parser   = new HtmlParser($response->getBody(), $logger);
-            $includes = Autodiscovery::formatIncludeAsXpath(Autodiscovery::formatsAll());
-            $excludes = Autodiscovery::formatExcludeAsXpath();
-            $query    = Autodiscovery::formatQuery($includes, $excludes);
-            $results  = $parser->xpath()->query($query);
+            $includes = static::formatIncludeAsXpath(static::formatsAll());
+            $excludes = static::formatExcludeAsXpath();
+
+            $query   = static::formatQuery($includes, $excludes);
+            $results = $parser->xpath()->query($query);
+
+            $logger->debug($query, [
+                'matches' => count($results),
+            ]);
 
             foreach ($results as $result) {
                 $link = new Uri((string) $result->nodeValue);
@@ -63,6 +68,8 @@ class Autodiscovery
 
                 $queue->append($link);
             }
+
+            $response->getBody()->rewind();
 
             return new FulfilledPromise($response);
         };

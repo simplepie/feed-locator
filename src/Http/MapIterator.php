@@ -79,7 +79,7 @@ class MapIterator implements Iterator
     /**
      * Return the key of the current element.
      */
-    public function key(): int
+    public function key()
     {
         return $this->inner->key();
     }

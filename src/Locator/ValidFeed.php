@@ -12,6 +12,7 @@ namespace FeedLocator\Locator;
 
 use ArrayIterator;
 use FeedLocator\Enum as E;
+use FeedLocator\Queue;
 use FeedLocator\Validator\AtomValidator;
 use FeedLocator\Validator\JsonFeedValidator;
 use FeedLocator\Validator\RdfValidator;
@@ -20,7 +21,6 @@ use GuzzleHttp\Promise\FulfilledPromise;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use SimplePie\UtilityPack\Util\Types;
 
 class ValidFeed
 {
@@ -31,7 +31,7 @@ class ValidFeed
     {
     }
 
-    public static function isFeed(string $uri, ArrayIterator $queue, LoggerInterface $logger, ArrayIterator &$results)
+    public static function isFeed(string $uri, Queue $queue, LoggerInterface $logger, ArrayIterator &$results)
     {
         $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
 
