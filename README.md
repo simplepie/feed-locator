@@ -40,7 +40,7 @@
 
 **Pre-1.0 code here. No [SemVer] backwards-compatiblity guaranteed from commit to commit at this stage.**
 
-Most of the important bits are working. Still tweaking the user-facing APIs. Need to refactor a few spots for DRY and just general efficiency. Need to write automated tests. Need to tune the log-levels. Still continues to perform some work after we already have what we need.
+Most of the important bits are working. Still tweaking the user-facing APIs. Need to refactor a few spots for DRY and just general efficiency. Need to write automated tests. Need to tune the log-levels. Still continues to perform some work after we already have what we need. See the [path to 1.0](https://github.com/simplepie/feed-locator/milestone/1).
 
 We support [PSR-7], but for making the _actual_ requests, we (presently) have a hard dependency on [Guzzle 6 Async Pools](http://docs.guzzlephp.org/en/stable/quickstart.html?highlight=GuzzleHttp\Pool) for purposes of speed and efficiency. Other possible adapters could be accepted once I create a pluggable framework for them.
 

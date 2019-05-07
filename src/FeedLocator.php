@@ -23,7 +23,6 @@ use SimplePie\UtilityPack\Mixin as UpTr;
 /**
  * `FeedLocator\FeedLocator` is the primary entry point for Feed Locator.
  *
- * @see https://github.com/simplepie/simplepie/blob/master/library/SimplePie/Locator.php
  * @see https://web.archive.org/web/20100620085023/http://diveintomark.org/archives/2002/08/15/ultraliberal_rss_locator
  *
  * 0. At every step, RSS feeds are minimally verified to make sure they are really RSS feeds.
