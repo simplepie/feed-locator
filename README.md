@@ -26,6 +26,7 @@
 * [ ] Will provide a CLI tool which accepts an input URI and can return a list of feeds.
 * [ ] Will support _offline/local_ mode where you can parse a local file, and receive "best-guess" matches.
 * [ ] Will support caching the results so that the next request for a URI will return the cached results instead of making live queries.
+* [X] Supports automatic retries, with exponential back-off + jitter.
 
 ### Standards-Compliant
 
@@ -47,6 +48,7 @@ We support [PSR-7], but for making the _actual_ requests, we (presently) have a 
 ## Example Usage
 
 ```php
+use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use FeedLocator\FeedLocator;
 use FeedLocator\Http\DefaultConfig;
 use FeedLocator\Locator\Autodiscovery;
@@ -56,13 +58,15 @@ use Monolog\Logger;
 use Psr\Log\LogLevel;
 
 # Define our logger
-$logger = new Logger('FeedLocator');
-$logger->pushHandler(new ErrorLogHandler(
+$logger  = new Logger('FeedLocator');
+$handler = new ErrorLogHandler(
     ErrorLogHandler::OPERATING_SYSTEM,
     LogLevel::DEBUG,
     true,
     false
-));
+);
+$handler->setFormatter(new ColoredLineFormatter());
+$logger->pushHandler($handler);
 
 # Discover the status page feed for Firebase.
 $locator = new FeedLocator('https://status.firebase.google.com');
