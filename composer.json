@@ -48,7 +48,8 @@
         "sebastian/phpcpd": "^4.0",
         "squizlabs/php_codesniffer": "dev-master",
         "twig/twig": "^2.9",
-        "wapmorgan/php-code-analyzer": "^1.0"
+        "wapmorgan/php-code-analyzer": "^1.0",
+        "bramus/monolog-colored-line-formatter": "^3.0"
     },
     "config": {
         "bin-dir": "bin/",

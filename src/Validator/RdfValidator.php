@@ -23,7 +23,7 @@ class RdfValidator extends AbstractValidator implements ValidatorInterface
     public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
         if ($contentSniffing) {
-            return static::scanBodyFor($response, '%<rdf:RDF\s?([^>]*)http://purl.org/rss/1.0/([^>]*)>%im', 500);
+            return static::scanBodyFor($response, '%<rdf:RDF\s?([^>]*)http://purl.org/rss/1.0/([^>]*)>%im', 1000);
         }
 
         // `application/rdf+xml`, `application/rdf`, `application/xml`, `text/xml`, `text/rdf`

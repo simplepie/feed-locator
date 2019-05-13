@@ -23,7 +23,7 @@ class AtomValidator extends AbstractValidator implements ValidatorInterface
     public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
         if ($contentSniffing) {
-            return static::scanBodyFor($response, '%<feed\s?([^>]*)http://www.w3.org/2005/Atom([^>]*)>%im', 500);
+            return static::scanBodyFor($response, '%<feed\s?([^>]*)http://www.w3.org/2005/Atom([^>]*)>%im', 1000);
         }
 
         // `application/atom+xml`, `application/xml`, `text/xml`

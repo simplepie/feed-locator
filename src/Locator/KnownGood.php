@@ -28,6 +28,7 @@ class KnownGood
      */
     private function __construct()
     {
+        // Do not instantiate.
     }
 
     /**

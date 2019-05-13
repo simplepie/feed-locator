@@ -31,19 +31,27 @@ class Autodiscovery
      */
     private function __construct()
     {
+        // Do not instantiate.
     }
 
     /**
-     * [parse description].
+     * Parses the content of the PSR-7 body and looks for matches that appear to be Autodiscovery markers.
      *
-     * @param string          $uri    [description]
-     * @param Queue           $queue  [description]
-     * @param LoggerInterface $logger [description]
+     * @param string          $uri    The URI that we are parsing, and that the PSR-7 body contains the contents of.
+     * @param Queue           $queue  The Queue object which keeps track of the work that needs to be done.
+     * @param LoggerInterface $logger An instantiated PSR-3 logger object.
+     *
+     * @return callable A _thennable_ which returns a fulfilled or rejected promise.
      */
     public static function parse(string $uri, Queue $queue, LoggerInterface $logger): callable
     {
         $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
 
+        /*
+         * A _thennable_ which returns a fulfilled or rejected promise.
+         *
+         * @param ResponseInterface $response A PSR-7 response object.
+         */
         return static function (ResponseInterface $response) use ($uri, $queue, $logger): PromiseInterface {
             $logger->debug(\sprintf('The closure from `%s` is running.', __CLASS__));
 
@@ -58,15 +66,16 @@ class Autodiscovery
             $query   = static::formatQuery($includes, $excludes);
             $results = $parser->xpath()->query($query);
 
+            // How many results did the XPath query result in?
             $logger->debug($query, [
                 'matches' => \count($results),
             ]);
 
             foreach ($results as $result) {
                 $link = new Uri((string) $result->nodeValue);
-                $link = (string) UriResolver::resolve($effectiveUri, $link);
+                $link = UriResolver::resolve($effectiveUri, $link);
 
-                $queue->append($link);
+                $queue->append((string) $link);
             }
 
             $response->getBody()->rewind();

@@ -10,10 +10,7 @@ declare(strict_types=1);
 
 namespace FeedLocator\Parser;
 
-use DOMComment;
 use DOMDocument;
-use DOMNode;
-use DOMText;
 use DOMXPath;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -70,6 +67,8 @@ class Html extends AbstractParser
         // Parse the XML document with the configured libxml options
         $this->domDocument->loadHTML($this->rawDocument, $this->libxml);
 
+        // file_put_contents(__DIR__ . '/domtree.html', $this->domDocument->saveXML());
+
         // Clear the libxml errors to avoid excessive memory usage
         \libxml_clear_errors();
     }
@@ -83,22 +82,5 @@ class Html extends AbstractParser
     public function xpath()
     {
         return new DOMXPath($this->domDocument);
-    }
-
-    /**
-     * Some DOMNode names are `#comment` or `#text`. This method will move the
-     * pointer to the next node, then the next until it finds a real XML node.
-     *
-     * @param DOMNode $node The `DOMNode` element to evaluate.
-     */
-    public function findNextRealNode(DOMNode $node): DOMNode
-    {
-        $n = $node;
-
-        while (($n instanceof DOMComment || $n instanceof DOMText) && null !== $n) {
-            $n = $n->nextSibling;
-        }
-
-        return $n;
     }
 }

@@ -34,22 +34,32 @@ class Queue implements ArrayAccess, Countable, Iterator, Serializable
      */
     protected $completed;
 
+    /**
+     * The callable to apply to every new entry in the queue.
+     *
+     * @var callable
+     */
     protected $func;
 
     /**
      * Constructs a new instance of this class.
      *
-     * @param array|iterable $value [description]
-     * @param callable|null  $func  [description]
+     * @param array|iterable $values [description]
+     * @param callable|null  $func   [description]
      */
-    public function __construct(iterable $value = [], ?callable $func = null)
+    public function __construct(iterable $values = [], ?callable $func = null)
     {
         $this->func = $func ?: static function (string $uri): string {
             return (string) UriNormalizer::normalize(new Uri($uri));
         };
 
-        $this->queue     = new ArrayIterator($value, ArrayIterator::STD_PROP_LIST | ArrayIterator::ARRAY_AS_PROPS);
         $this->completed = new ArrayIterator();
+        $this->queue     = new ArrayIterator([], ArrayIterator::STD_PROP_LIST | ArrayIterator::ARRAY_AS_PROPS);
+
+        foreach ($values as $value) {
+            $value               = ($this->func)($value);
+            $this->queue[$value] = $value;
+        }
     }
 
     /**
@@ -68,6 +78,7 @@ class Queue implements ArrayAccess, Countable, Iterator, Serializable
         if (isset($this->queue[$offset])) {
             $value                   = $this->queue[$offset];
             $this->completed[$value] = null;
+            unset($this->queue[$offset]);
 
             return $value;
         }
@@ -76,16 +87,22 @@ class Queue implements ArrayAccess, Countable, Iterator, Serializable
     /**
      * @see ArrayAccess
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet($offset, $values): void
     {
         // Shutup linter
         $offset;
 
-        // Normalize
-        $value = ($this->func)($value);
+        $values = \is_iterable($values)
+            ? $values
+            : [$values];
 
-        if (!isset($this->completed[$value])) {
-            $this->queue[$value] = $value;
+        foreach ($values as $value) {
+            // Normalize
+            $value = ($this->func)($value);
+
+            if (!isset($this->completed[$value])) {
+                $this->queue[$value] = $value;
+            }
         }
     }
 
@@ -167,21 +184,33 @@ class Queue implements ArrayAccess, Countable, Iterator, Serializable
         return $this->queue->valid();
     }
 
+    /**
+     * Simplified access to a copy of the array.
+     */
     public function getArrayCopy(): array
     {
         return $this->queue->getArrayCopy();
     }
 
+    /**
+     * Implementation of array.push.
+     */
     public function push($value): void
     {
         $this->offsetSet($value, $value);
     }
 
+    /**
+     * Implementation of array.push.
+     */
     public function append($value): void
     {
         $this->offsetSet($value, $value);
     }
 
+    /**
+     * Implementation of array.pop.
+     */
     public function pop()
     {
         $queue = $this->queue->getArrayCopy();

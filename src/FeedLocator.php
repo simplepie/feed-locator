@@ -14,6 +14,7 @@ use ArrayIterator;
 use FeedLocator\Locator\Autodiscovery;
 use FeedLocator\Locator\KnownGood;
 use FeedLocator\Locator\Scrape;
+use FeedLocator\Locator\Status;
 use FeedLocator\Locator\ValidFeed;
 use FeedLocator\Mixin as Tr;
 use GuzzleHttp\Promise as func;
@@ -24,14 +25,6 @@ use SimplePie\UtilityPack\Mixin as UpTr;
  * `FeedLocator\FeedLocator` is the primary entry point for Feed Locator.
  *
  * @see https://web.archive.org/web/20100620085023/http://diveintomark.org/archives/2002/08/15/ultraliberal_rss_locator
- *
- * 0. At every step, RSS feeds are minimally verified to make sure they are really RSS feeds.
- * 1. If the URI points to an RSS feed, it is simply returned; otherwise the page is downloaded and the real fun begins.
- * 2. Feeds pointed to by LINK tags in the header of the page (RSS autodiscovery)
- * 3. <A> links to feeds on the same server ending in ".rss", ".rdf", or ".xml"
- * 4. <A> links to feeds on the same server containing "rss", "rdf", or "xml"
- * 5. <A> links to feeds on external servers ending in ".rss", ".rdf", or ".xml"
- * 6. <A> links to feeds on external servers containing "rss", "rdf", or "xml"
  */
 class FeedLocator
 {
@@ -62,6 +55,20 @@ class FeedLocator
     protected $queue;
 
     /**
+     * The original URI that was passed into the locator.
+     *
+     * @var string
+     */
+    protected $sourceUri;
+
+    /**
+     * Stores whether or not the source URI is being fetch and parsed for the first time.
+     *
+     * @var bool
+     */
+    protected $firstSource;
+
+    /**
      * Constructs a new instance of this class.
      *
      * @param string   $uri         The URI on which to begin the auto-discovery scanning.
@@ -73,17 +80,23 @@ class FeedLocator
         $this->logger      = new NullLogger();
         $this->concurrency = $concurrency;
         $this->results     = new ArrayIterator();
-        $this->queue       = $this->queueFor($uri);
+        $this->sourceUri   = $uri;
+        $this->firstSource = true;
+        $this->queue       = $this->queueFor($this->sourceUri);
     }
 
     public function run()
     {
         $handler = function (string $uri, Queue $queue) {
             return $this->client->getAsync($uri)
-                ->then(ValidFeed::isFeed($uri, $queue, $this->logger, $this->results))
+                ->then(
+                    ValidFeed::parse($uri, $queue, $this->logger, $this->sourceUri, $this->firstSource, $this->results)
+                )
                 ->then(KnownGood::parse($uri, $queue, $this->logger))
                 ->then(Autodiscovery::parse($uri, $queue, $this->logger))
-                ->then(Scrape::parse($uri, $queue, $this->logger))
+                ->then(Scrape::parse($uri, $queue, $this->logger, $this->sourceUri, Scrape::MODE_SAME_DOMAIN))
+                ->then(Scrape::parse($uri, $queue, $this->logger, $this->sourceUri, Scrape::MODE_ROOT_DOMAIN))
+                ->then(Status::counter($queue, $this->logger, $this->results))
                 ->otherwise(static::handleReject());
         };
 
@@ -93,18 +106,28 @@ class FeedLocator
         return func\each_limit($generator, $this->concurrency);
     }
 
+    /**
+     * Return the list of feeds that have been validated as such.
+     */
     public function getResults(): ArrayIterator
     {
         return $this->results;
     }
 
+    /**
+     * We use rejections to manage promise flow. This a default `void` handler.
+     */
     protected static function handleReject(): callable
     {
         return static function (string $reason): void {
-            die($reason . \PHP_EOL);
         };
     }
 
+    /**
+     * Accepts an iterable object and wraps it into a Queue object.
+     *
+     * @param iterable $value The iterable object to wrap into a Queue object.
+     */
     protected function queueFor($value): Queue
     {
         if ($value instanceof Queue) {

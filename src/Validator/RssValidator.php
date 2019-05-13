@@ -23,7 +23,7 @@ class RssValidator extends AbstractValidator implements ValidatorInterface
     public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
         if ($contentSniffing) {
-            return static::scanBodyFor($response, '%<rss\s?([^>]*)>%im', 500);
+            return static::scanBodyFor($response, '%<rss\s?([^>]*)>%im', 1000);
         }
 
         // `application/rss+xml`, `application/xml`, `text/xml`
