@@ -12,7 +12,7 @@ namespace FeedLocator;
 
 use ArrayIterator;
 use FeedLocator\Locator\Autodiscovery;
-use FeedLocator\Locator\KnownGood;
+use FeedLocator\Locator\EffectiveUri;
 use FeedLocator\Locator\Scrape;
 use FeedLocator\Locator\Status;
 use FeedLocator\Locator\ValidFeed;
@@ -75,7 +75,7 @@ class FeedLocator
      * @param int|null $concurrency The number of parallel threads to use. Should be equal to, or fewer than, the
      *                              number of CPU cores running the code.
      */
-    public function __construct(string $uri, int $concurrency = 1)
+    public function __construct(string $uri, int $concurrency = 5)
     {
         $this->logger      = new NullLogger();
         $this->concurrency = $concurrency;
@@ -89,10 +89,8 @@ class FeedLocator
     {
         $handler = function (string $uri, Queue $queue) {
             return $this->client->getAsync($uri)
-                ->then(
-                    ValidFeed::parse($uri, $queue, $this->logger, $this->sourceUri, $this->firstSource, $this->results)
-                )
-                ->then(KnownGood::parse($uri, $queue, $this->logger))
+                ->then(EffectiveUri::parse($this->sourceUri, $this->firstSource, $this->logger))
+                ->then(ValidFeed::parse($uri, $queue, $this->logger, $this->results))
                 ->then(Autodiscovery::parse($uri, $queue, $this->logger))
                 ->then(Scrape::parse($uri, $queue, $this->logger, $this->sourceUri, Scrape::MODE_SAME_DOMAIN))
                 ->then(Scrape::parse($uri, $queue, $this->logger, $this->sourceUri, Scrape::MODE_ROOT_DOMAIN))

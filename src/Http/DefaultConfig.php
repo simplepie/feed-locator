@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace FeedLocator\Http;
 
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware as GMW;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
 use SimplePie\UtilityPack\Util\Bytes;
@@ -20,10 +21,16 @@ class DefaultConfig
     /**
      * Default HandlerStack with pre-included middleware.
      */
-    public static function handlerStack(): HandlerStack
+    public static function handlerStack(LoggerInterface $logger): HandlerStack
     {
         $stack = HandlerStack::create();
         $stack->push(Middleware::saveEffectiveUri());
+        $stack->push(
+            GMW::retry(
+                Middleware::createRetryHandler($logger),
+                [Middleware::class, 'exponentialDelay']
+            )
+        );
 
         return $stack;
     }
@@ -57,7 +64,7 @@ class DefaultConfig
             'timeout'         => 3.0,
             'http_errors'     => false,
             'on_stats'        => static::statsHandler($logger),
-            'handler'         => static::handlerStack(),
+            'handler'         => static::handlerStack($logger),
         ];
     }
 }

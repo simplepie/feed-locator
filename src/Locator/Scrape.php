@@ -25,9 +25,11 @@ use Psr\Log\LoggerInterface;
  */
 class Scrape
 {
-    public const MODE_ROOT_DOMAIN = 0x00000000;
+    // Search for matching URIs on the same root-level domain name.
+    public const MODE_ROOT_DOMAIN = 0x00000100;
 
-    public const MODE_SAME_DOMAIN = 0x00000001;
+    // Search for matching URIs on the exact same domain name.
+    public const MODE_SAME_DOMAIN = 0x00000010;
 
     /**
      * Constructs a new instance of this class.
@@ -40,11 +42,12 @@ class Scrape
     /**
      * [parse description].
      *
-     * @param string          $uri       [description]
-     * @param Queue           $queue     [description]
-     * @param LoggerInterface $logger    [description]
-     * @param string          $sourceUri [description]
-     * @param int             $mode      [description]
+     * @param string          $uri        The URI that we are parsing, and that the PSR-7 body contains the contents of.
+     * @param Queue           $queue      The Queue object which keeps track of the work that needs to be done.
+     * @param LoggerInterface $logger     An instantiated PSR-3 logger object.
+     * @param string          &$sourceUri The original source URI that was originally passed into the `FeedLocator`.
+     * @param int             $mode       The mode with which to parse the content. The default value is to search for
+     *                                    matching URIs on the exact same domain name.
      *
      * phpcs:disable Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine
      */
@@ -59,11 +62,21 @@ class Scrape
 
         $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
 
-        // phpcs:disable Generic.Files.LineLength.MaxExceeded
-        return static function (ResponseInterface $response) use ($uri, $queue, $logger, $sourceUri, $mode): PromiseInterface {
+        /*
+         * A _thennable_ which returns a fulfilled or rejected promise.
+         *
+         * @param ResponseInterface $response A PSR-7 response object.
+         *
+         * phpcs:disable Generic.Files.LineLength.MaxExceeded
+         */
+        return static function (ResponseInterface $response) use ($uri, $queue, $logger, &$sourceUri, $mode): PromiseInterface {
             // phpcs:enable
 
-            $logger->debug(\sprintf('The closure from `%s` is running.', __CLASS__));
+            $logger->debug(\sprintf(
+                'The closure from `%s` is running in %s mode.',
+                __CLASS__,
+                static::getModePhrase($mode)
+            ));
 
             $parser = new HtmlParser($response->getBody(), $logger);
 
@@ -96,11 +109,11 @@ class Scrape
                 // Does the hostname of the link share the same root-level domain as our starting URI?
                 if (false !== \mb_strpos($linkHost, $sourceRootHost)) {
                     $queue->append((string) $link);
-                    $logger->debug(\sprintf('✓ %s is part of the %s domain', $linkHost, $sourceRootHost), [
+                    $logger->debug(\sprintf('✓ "%s" is part of the "%s" domain', $linkHost, $sourceRootHost), [
                         'uri' => (string) $link,
                     ]);
                 } else {
-                    $logger->debug(\sprintf('‼︎ %s is NOT part of the %s domain', $linkHost, $sourceRootHost), [
+                    $logger->debug(\sprintf('‼︎ "%s" is NOT part of the "%s" domain', $linkHost, $sourceRootHost), [
                         'uri' => (string) $link,
                     ]);
                 }
@@ -113,7 +126,7 @@ class Scrape
     }
 
     /**
-     * [feedKeywords description].
+     * Keywords which can be used to identify feeds in URIs.
      */
     public static function feedKeywords(): array
     {
@@ -129,10 +142,11 @@ class Scrape
     /**
      * Generates the final XPath 1.0 query, including the list of _includes_ and _excludes_.
      *
-     * @param array       $keywords  [description]
-     * @param string      $sourceUri [description]
-     * @param string|null $host      [description]
-     * @param int         $mode      [description]
+     * @param array       $keywords   The list of keywords to use for identifying feeds in URIs.
+     * @param string      &$sourceUri The original source URI that was originally passed into the `FeedLocator`.
+     * @param string|null $host       The current host of the URI being parsed.
+     * @param int         $mode       The mode with which to parse the content. The default value is to search for
+     *                                matching URIs on the exact same domain name.
      *
      * phpcs:disable Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine
      */
@@ -169,9 +183,9 @@ class Scrape
     }
 
     /**
-     * [parseHost description].
+     * Parse the hostname to identify the root-level domain name.
      *
-     * @param string $host [description]
+     * @param string $host The current host of the URI being parsed.
      */
     public static function parseHost(string $host): string
     {
@@ -194,9 +208,9 @@ class Scrape
     }
 
     /**
-     * [xpathSameDomain description].
+     * A variable portion of the XPath 1.0 query used when identifying the exact same domain name.
      *
-     * @param Uri $host [description]
+     * @param Uri $host The current host of the URI being parsed.
      */
     public static function xpathSameDomain(Uri $host): string
     {
@@ -207,9 +221,9 @@ class Scrape
     }
 
     /**
-     * [xpathRootDomain description].
+     * A variable portion of the XPath 1.0 query used when identifying the same root-level domain name.
      *
-     * @param Uri $host [description]
+     * @param Uri $host The current host of the URI being parsed.
      */
     public static function xpathRootDomain(Uri $host): string
     {
@@ -217,5 +231,24 @@ class Scrape
             'contains(@href, "%s")',
             static::parseHost($host->getHost())
         );
+    }
+
+    /**
+     * A phrase which represents the mode of parsing. Useful for log messages.
+     *
+     * @param int $mode One of the `MODE_*` constants.
+     */
+    public static function getModePhrase(int $mode): ?string
+    {
+        switch ($mode) {
+            case static::MODE_ROOT_DOMAIN:
+                return 'same root domain';
+
+            case static::MODE_SAME_DOMAIN:
+                return 'same full domain';
+
+            default:
+                return null;
+        }
     }
 }

@@ -37,6 +37,11 @@ abstract class AbstractValidator
         $firstBits = $body->read($readBytes);
         $body->rewind();
 
+        // echo '--------------------------------------------------------------------------' . \PHP_EOL;
+        // echo $response->getStatusCode() . \PHP_EOL;
+        // echo $firstBits . \PHP_EOL;
+        // echo '--------------------------------------------------------------------------' . \PHP_EOL;
+
         return (bool) \preg_match($regex, $firstBits);
     }
 

@@ -119,14 +119,14 @@ class Autodiscovery
     public static function formatsRdf(): array
     {
         return [
-            'application/rdf',
-            'application/rdf+xml',
-            'application/x-rdf',
-            'application/x-rdf+xml',
-            'text/rdf',
-            'text/rdf+xml',
-            'text/x-rdf',
-            'text/x-rdf+xml',
+            // 'application/rdf',
+            // 'application/rdf+xml',
+            // 'application/x-rdf',
+            // 'application/x-rdf+xml',
+            // 'text/rdf',
+            // 'text/rdf+xml',
+            // 'text/x-rdf',
+            // 'text/x-rdf+xml',
         ];
     }
 
@@ -141,12 +141,12 @@ class Autodiscovery
         return [
             'application/rss',
             'application/rss+xml', // Canonical.
-            'application/x-rss',
-            'application/x-rss+xml',
-            'text/rss',
-            'text/rss+xml',
-            'text/x-rss',
-            'text/x-rss+xml',
+            // 'application/x-rss',
+            // 'application/x-rss+xml',
+            // 'text/rss',
+            // 'text/rss+xml',
+            // 'text/x-rss',
+            // 'text/x-rss+xml',
         ];
     }
 
@@ -156,10 +156,10 @@ class Autodiscovery
     public static function formatsXml(): array
     {
         return \array_merge(static::formatsAtom(), static::formatsRdf(), static::formatsRss(), [
-            'application/xml',
-            'application/x-xml',
-            'text/xml',
-            'text/x-xml',
+            // 'application/xml',
+            // 'application/x-xml',
+            // 'text/xml',
+            // 'text/x-xml',
         ]);
     }
 

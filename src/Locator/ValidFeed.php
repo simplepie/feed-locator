@@ -36,11 +36,10 @@ class ValidFeed
     /**
      * Parses the content of the PSR-7 body and validates its content for known feed-like markers.
      *
-     * @param string          $uri        The URI that we are parsing, and that the PSR-7 body contains the contents of.
-     * @param Queue           $queue      The Queue object which keeps track of the work that needs to be done.
-     * @param LoggerInterface $logger     An instantiated PSR-3 logger object.
-     * @param string          &$sourceUri A strong reference to the source URI that was originally passed-in.
-     * @param ArrayIterator   &$results   The collection of matched results.
+     * @param string          $uri      The URI that we are parsing, and that the PSR-7 body contains the contents of.
+     * @param Queue           $queue    The Queue object which keeps track of the work that needs to be done.
+     * @param LoggerInterface $logger   An instantiated PSR-3 logger object.
+     * @param ArrayIterator   &$results The collection of matched results.
      *
      * @return callable A _thennable_ which returns a fulfilled or rejected promise.
      *
@@ -50,8 +49,6 @@ class ValidFeed
         string $uri,
         Queue $queue,
         LoggerInterface $logger,
-        string &$sourceUri,
-        bool &$firstSource,
         ArrayIterator &$results
     ): callable {
         // phpcs:enable
@@ -65,7 +62,7 @@ class ValidFeed
          *
          * phpcs:disable Generic.Files.LineLength.MaxExceeded
          */
-        return static function (ResponseInterface $response) use ($uri, $queue, $logger, $sourceUri, $firstSource, $results): PromiseInterface {
+        return static function (ResponseInterface $response) use ($uri, $queue, $logger, $results): PromiseInterface {
             // phpcs:enable
 
             $logger->debug(\sprintf('The closure from `%s` is running.', __CLASS__));
@@ -84,12 +81,6 @@ class ValidFeed
 
             $effectiveUri = $response->getHeader('x-effective-uri');
             $effectiveUri = \end($effectiveUri);
-
-            // Only update the source URI with the effective URI on the first pass
-            if ($firstSource) {
-                $sourceUri   = $effectiveUri;
-                $firstSource = false;
-            }
 
             $logger->info($effectiveUri, $typeCheck);
 

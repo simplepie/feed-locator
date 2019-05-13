@@ -27,10 +27,22 @@ class Status
         // Do not instantiate.
     }
 
-    public static function counter(Queue $queue, LoggerInterface $logger, ArrayIterator &$results)
+    /**
+     * [counter description].
+     *
+     * @param Queue           $queue    The Queue object which keeps track of the work that needs to be done.
+     * @param LoggerInterface $logger   An instantiated PSR-3 logger object.
+     * @param ArrayIterator   &$results The collection of matched results.
+     */
+    public static function counter(Queue $queue, LoggerInterface $logger, ArrayIterator &$results): callable
     {
         $logger->debug(\sprintf('`%s::%s` has been instantiated.', __CLASS__, __FUNCTION__));
 
+        /*
+         * A _thennable_ which returns a fulfilled or rejected promise.
+         *
+         * @param ResponseInterface $response A PSR-7 response object.
+         */
         return static function (ResponseInterface $response) use ($queue, $logger, $results): PromiseInterface {
             $logger->debug(\sprintf('The closure from `%s` is running.', __CLASS__));
 
@@ -39,6 +51,7 @@ class Status
                 'results' => \count($results),
             ]);
 
+            // Always move forward
             return new FulfilledPromise($response);
         };
     }
