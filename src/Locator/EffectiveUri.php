@@ -50,9 +50,11 @@ class EffectiveUri
                 $effectiveUri = $response->getHeader('x-effective-uri');
                 $effectiveUri = \end($effectiveUri);
 
-                $logger->notice(\sprintf('Source URI has been updated from "%s" → "%s".', $sourceUri, $effectiveUri));
+                if ($sourceUri !== $effectiveUri) {
+                    $logger->notice(\sprintf('Source URI has been updated from "%s" → "%s".', $sourceUri, $effectiveUri));
+                    $sourceUri = $effectiveUri;
+                }
 
-                $sourceUri   = $effectiveUri;
                 $firstSource = false;
             }
 

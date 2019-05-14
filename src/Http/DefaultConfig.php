@@ -11,7 +11,6 @@ declare(strict_types=1);
 namespace FeedLocator\Http;
 
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Middleware as GMW;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
 use SimplePie\UtilityPack\Util\Bytes;
@@ -19,18 +18,26 @@ use SimplePie\UtilityPack\Util\Bytes;
 class DefaultConfig
 {
     /**
-     * Default HandlerStack with pre-included middleware.
+     * Constructs a new instance of this class.
      */
-    public static function handlerStack(LoggerInterface $logger): HandlerStack
+    private function __construct()
+    {
+        // Do not instantiate.
+    }
+
+    /**
+     * Default HandlerStack with pre-included middleware.
+     *
+     * @param iterable ...$handlers A variadic argument for the handlers which you want to apply to the HandlerStack.
+     */
+    public static function handlerStack(callable ...$handlers): HandlerStack
     {
         $stack = HandlerStack::create();
         $stack->push(Middleware::saveEffectiveUri());
-        $stack->push(
-            GMW::retry(
-                Middleware::createRetryHandler($logger),
-                [Middleware::class, 'exponentialDelay']
-            )
-        );
+
+        foreach ($handlers as $handler) {
+            $stack->push($handler);
+        }
 
         return $stack;
     }
@@ -38,7 +45,7 @@ class DefaultConfig
     /**
      * A default handler for Guzzle's `on_stats` event, which logs data about the request.
      *
-     * @param LoggerInterface $logger A PSR-3 logger.
+     * @param LoggerInterface $logger An instantiated PSR-3 logger object.
      */
     public static function statsHandler(LoggerInterface $logger): callable
     {
@@ -54,17 +61,17 @@ class DefaultConfig
     /**
      * Standard Guzzle client options that can be updated and passed into a new client.
      *
-     * @param LoggerInterface $logger A PSR-3 logger.
+     * @param LoggerInterface $logger An instantiated PSR-3 logger object.
      */
     public static function clientOptions(LoggerInterface $logger): array
     {
         return [
             'cookies'         => true,
-            'connect_timeout' => 3.0,
-            'timeout'         => 3.0,
+            'connect_timeout' => 10.0,
+            'timeout'         => 10.0,
             'http_errors'     => false,
             'on_stats'        => static::statsHandler($logger),
-            'handler'         => static::handlerStack($logger),
+            'handler'         => static::handlerStack(),
         ];
     }
 }
