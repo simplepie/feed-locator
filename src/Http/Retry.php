@@ -84,7 +84,7 @@ class Retry
                     ? 'status code: ' . $response->getStatusCode()
                     : $exception->getMessage()
             ), [
-                $request->getHeader('Host')[0],
+                ($request->getHeader('Host')[0] ?? $request->getHeader('Host')),
             ]);
 
             return true;

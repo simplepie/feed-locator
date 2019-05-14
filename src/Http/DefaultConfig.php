@@ -14,6 +14,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\TransferStats;
 use Psr\Log\LoggerInterface;
 use SimplePie\UtilityPack\Util\Bytes;
+use SimplePie\UtilityPack\Util\Types;
 
 class DefaultConfig
 {
@@ -28,14 +29,22 @@ class DefaultConfig
     /**
      * Default HandlerStack with pre-included middleware.
      *
-     * @param iterable ...$handlers A variadic argument for the handlers which you want to apply to the HandlerStack.
+     * @param LoggerInterface $logger      An instantiated PSR-3 logger object.
+     * @param iterable        ...$handlers A variadic argument for the handlers which you want to
+     *                                     apply to the HandlerStack.
      */
-    public static function handlerStack(callable ...$handlers): HandlerStack
+    public static function handlerStack(LoggerInterface $logger, callable ...$handlers): HandlerStack
     {
         $stack = HandlerStack::create();
         $stack->push(Middleware::saveEffectiveUri());
 
         foreach ($handlers as $handler) {
+            $logger->debug(\sprintf(
+                'Class `%s` configured to use `%s`',
+                HandlerStack::class,
+                Types::getClassOrType($handler)
+            ));
+
             $stack->push($handler);
         }
 
@@ -71,7 +80,7 @@ class DefaultConfig
             'timeout'         => 10.0,
             'http_errors'     => false,
             'on_stats'        => static::statsHandler($logger),
-            'handler'         => static::handlerStack(),
+            'handler'         => static::handlerStack($logger),
         ];
     }
 }

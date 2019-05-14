@@ -51,7 +51,12 @@ class EffectiveUri
                 $effectiveUri = \end($effectiveUri);
 
                 if ($sourceUri !== $effectiveUri) {
-                    $logger->notice(\sprintf('Source URI has been updated from "%s" → "%s".', $sourceUri, $effectiveUri));
+                    $logger->notice(\sprintf(
+                        'Source URI has been updated from "%s" → "%s".',
+                        $sourceUri,
+                        $effectiveUri
+                    ));
+
                     $sourceUri = $effectiveUri;
                 }
 

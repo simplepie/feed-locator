@@ -212,8 +212,8 @@ analyze: lint test
 
 	@ echo " "
 	@ echo "=====> Running PHP Lines-of-Code..."
-	- bin/phploc --progress --names=*.php --log-xml=$$(pwd)/reports/phploc-src.xml src/ > $$(pwd)/reports/phploc-src.txt
-	- bin/phploc --progress --names=*.php --log-xml=$$(pwd)/reports/phploc-tests.xml tests/ > $$(pwd)/reports/phploc-tests.txt
+	- bin/phploc --names=*.php --log-xml=$$(pwd)/reports/phploc-src.xml src/ > $$(pwd)/reports/phploc-src.txt
+	- bin/phploc --names=*.php --log-xml=$$(pwd)/reports/phploc-tests.xml tests/ > $$(pwd)/reports/phploc-tests.txt
 
 	@ echo " "
 	@ echo "=====> Running PHP Code Analyzer..."
@@ -223,15 +223,15 @@ analyze: lint test
 	@ echo " "
 	@ echo "=====> Running PHP Metrics Generator..."
 	@ # phpmetrics/phpmetrics
-	- bin/phpmetrics --config $$(pwd)/phpmetrics.yml --template-title="SimplePie NG" --level=10 src/
+	- bin/phpmetrics --since 7.2 --config $$(pwd)/phpmetrics.yml --template-title="SimplePie NG" --level=10 src/
 
 	@ echo " "
 	@ echo "=====> Running Open-Source License Check..."
-	- composer licenses -d www | grep -v BSD-.-Clause | grep -v MIT | grep -v Apache-2.0 | tee reports/licenses.txt
+	- composer licenses | grep -v BSD-.-Clause | grep -v MIT | grep -v Apache-2.0 | tee reports/licenses.txt
 
 	@ echo " "
 	@ echo "=====> Comparing Composer dependencies against the PHP Security Advisories Database..."
-	- curl -sSL -H "Accept: text/plain" https://security.sensiolabs.org/check_lock -F lock=@composer.lock | tee reports/sensiolabs.txt
+	- curl -sSL -H "Accept: text/plain" https://security.symfony.com/check_lock -F lock=@composer.lock | tee reports/sensiolabs.txt
 
 #-------------------------------------------------------------------------------
 # Git Tasks
