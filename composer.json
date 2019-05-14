@@ -58,7 +58,9 @@
         "phpunit/phpunit": "^8.1",
         "sebastian/phpcpd": "^4.0",
         "squizlabs/php_codesniffer": "dev-master",
-        "wapmorgan/php-code-analyzer": "^1.0"
+        "wapmorgan/php-code-analyzer": "^1.0",
+        "kevinrob/guzzle-cache-middleware": "^3.2",
+        "league/flysystem": "^1.0"
     },
     "config": {
         "bin-dir": "bin/",

@@ -221,11 +221,6 @@ analyze: lint test
 	- php bin/phpca tests/ --no-progress | tee reports/phpca-tests.txt
 
 	@ echo " "
-	@ echo "=====> Running PHP Metrics Generator..."
-	@ # phpmetrics/phpmetrics
-	- bin/phpmetrics --since 7.2 --config $$(pwd)/phpmetrics.yml --template-title="SimplePie NG" --level=10 src/
-
-	@ echo " "
 	@ echo "=====> Running Open-Source License Check..."
 	- composer licenses | grep -v BSD-.-Clause | grep -v MIT | grep -v Apache-2.0 | tee reports/licenses.txt
 
