@@ -13,7 +13,7 @@
 1. [X] If the URI points to a feed, it is simply returned; otherwise the page is downloaded and the real fun begins.
 1. [X] Feeds pointed to by `<link>` tags in the header of the page. (This is standard autodiscovery.)
 1. [X] `<a>` links to feeds on the same hostname, where the URIs contain `atom`, `feed`, `rdf`, `rss`, or `xml`.
-1. [ ] `<a>` links to feeds on a subdomain, where the URIs contain `atom`, `feed`, `rdf`, `rss`, or `xml`.
+1. [X] `<a>` links to feeds on a subdomain, where the URIs contain `atom`, `feed`, `rdf`, `rss`, or `xml`.
 1. [ ] `<a>` links to feeds on a different domain, where the URIs contain `atom`, `feed`, `rdf`, `rss`, or `xml`.
 
 ## Features
@@ -32,7 +32,7 @@
 * [X] Returns a list of results; each contains the feed URI, the format of the feed, and its server media type.
 * [ ] Will provide a CLI tool which accepts an input URI and can return a list of feeds.
 * [ ] Will support _offline/local_ mode where you can parse a local file, and receive "best-guess" matches.
-* [ ] Will support caching the results so that the next request for a URI will return the cached results instead of making live queries.
+* [X] Will support caching the results so that the next request for a URI will return the cached results instead of making live queries.
 * [X] Supports automatic retries, with exponential back-off + jitter.
 
 ### Standards-Compliant
@@ -41,7 +41,7 @@
 * [X] Supports standardized [PSR-3] loggers like [Monolog](https://packagist.org/packages/monolog/monolog).
 * [X] Supports standardized [PSR-4] autoloading for classes and directory structure.
 * [X] Code comments and docblocks are compatible with [PSR-5]/[PSR-19].
-* [ ] Caching will be compatible with [PSR-6]/[PSR-16].
+* [X] Caching will be compatible with [PSR-6]/[PSR-16].
 * [X] We leverage [PSR-7] for message handling, and typehint against PSR-7 interface types.
 
 ## Development Status
