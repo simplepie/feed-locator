@@ -58,8 +58,11 @@ We support [PSR-7], but for making the _actual_ requests, we (presently) have a 
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use FeedLocator\FeedLocator;
 use FeedLocator\Http\DefaultConfig;
-use FeedLocator\Locator\Autodiscovery;
+use FeedLocator\Http\Retry;
 use GuzzleHttp\Client;
+use Kevinrob\GuzzleCache\CacheMiddleware;
+use Kevinrob\GuzzleCache\Storage\FlysystemStorage;
+use Kevinrob\GuzzleCache\Strategy\PrivateCacheStrategy;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use Psr\Log\LogLevel;
@@ -75,13 +78,29 @@ $handler = new ErrorLogHandler(
 $handler->setFormatter(new ColoredLineFormatter());
 $logger->pushHandler($handler);
 
-# Discover the status page feed for Firebase.
-$locator = new FeedLocator('https://status.firebase.google.com');
+# Define our HTTP cacher
+$tmpDir = sprintf('%s/FeedLocator', sys_get_temp_dir());
+$logger->debug(sprintf('Cache directory: %s', $tmpDir));
+$cacheMiddleware = new CacheMiddleware(
+    new PrivateCacheStrategy(
+        new FlysystemStorage(
+            new Local($tmpDir)
+        )
+    )
+);
+
+# Discover the feeds linked from Apple's RSS page.
+$locator = new FeedLocator('apple.com/rss');
 
 # Use the default configuration, but tweak a few values.
 $options = DefaultConfig::clientOptions($logger);
 $options['connect_timeout'] = 10.0;
 $options['timeout']         = 10.0;
+$options['handler']         = DefaultConfig::handlerStack(
+    $logger,
+    Retry::defaultHandler($logger),
+    $cacheMiddleware
+);
 
 # Set the logger and Guzzle client to use
 $locator->setLogger($logger);
@@ -103,11 +122,40 @@ Array
 (
     [0] => Array
         (
-            [0] => https://status.firebase.google.com/feed.atom
+            [0] => https://www.apple.com/newsroom/rss-feed.rss
             [1] => atom
-            [2] => application/atom+xml
+            [2] => application/rss+xml;charset=utf-8
         )
 
+    [1] => Array
+        (
+            [0] => http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml
+            [1] => atom
+            [2] => application/xml
+        )
+
+    [2] => Array
+        (
+            [0] => http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topalbums/limit=10/xml
+            [1] => atom
+            [2] => application/xml
+        )
+
+    [3] => Array
+        (
+            [0] => http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=10/xml
+            [1] => atom
+            [2] => application/xml
+        )
+
+    [4] => Array
+        (
+            [0] => https://developer.apple.com/news/rss/news.rss
+            [1] => rss
+            [2] => application/rss+xml; charset=UTF-8
+        )
+
+    # ...snip...
 )
 ```
 
