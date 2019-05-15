@@ -1,4 +1,11 @@
+<div align="center"><img src="logo.png" width="500"><br></div>
+
+----
+
 # Feed Locator
+
+[![Medium](https://img.shields.io/badge/medium-simplepie--ng-blue.svg?style=for-the-badge)](https://medium.com/simplepie-ng)
+[![Follow](https://img.shields.io/twitter/follow/simplepie_ng.svg?style=for-the-badge&label=Twitter)](https://twitter.com/intent/follow?screen_name=simplepie_ng)
 
 **Feed Locator** is a _modern_ PHP implementation of Mark Pilgrim's [rssfinder.py](https://web.archive.org/web/20100620085023/http://diveintomark.org/projects/misc/rssfinder.py.txt) which was born from his desire for an [ultra-liberal RSS locator](https://web.archive.org/web/20100620085023/http://diveintomark.org/archives/2002/08/15/ultraliberal_rss_locator). This was the model for the [`SimplePie_Locator`](https://github.com/simplepie/simplepie/blob/master/library/SimplePie/Locator.php) class in SimplePie “OG”.
 

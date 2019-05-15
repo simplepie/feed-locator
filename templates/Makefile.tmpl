@@ -1,0 +1,50 @@
+@@HEADER@@
+
+#-------------------------------------------------------------------------------
+# Global variables.
+
+@@DOCKER_VARS@@
+
+#-------------------------------------------------------------------------------
+# Running `make` will show the list of subcommands that will run.
+
+@@MAKE_ALL@@
+
+#-------------------------------------------------------------------------------
+# Running tests
+
+.PHONY: test
+test:
+	bin/phpunit --testsuite all
+
+.PHONY: test-quick
+test-quick:
+	docker-compose up $(TEST_QUICK)
+
+.PHONY: test-coverage
+test-coverage:
+	docker-compose up $(TEST_COVER)
+
+.PHONY: test-benchmark
+test-benchmark:
+	docker-compose up $(TEST_BENCH)
+
+#-------------------------------------------------------------------------------
+# PHP build process stuff
+
+@@PHP_BUILD_PROCESS@@
+
+#-------------------------------------------------------------------------------
+# Documentation tasks
+
+@@PROJECT_DOCS@@
+
+#-------------------------------------------------------------------------------
+# Linting and Static Analysis
+
+@@LINTING_STATIC_ANALYSIS@@
+
+#-------------------------------------------------------------------------------
+# Git Tasks
+
+@@RELEASE_TASKS@@
