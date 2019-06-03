@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace FeedLocator\Http;
 
+use Exception;
 use GuzzleHttp\Exception\ConnectException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Middleware as GuzzleMiddleware;
@@ -21,6 +22,8 @@ class Retry
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -51,7 +54,7 @@ class Retry
         /*
          * A handler callable which determines the rules of performing a request retry.
          *
-         * @param mixed $retries              The retries that have already been performed.
+         * @param int $retries              The retries that have already been performed.
          * @param Psr7Request $request        A PSR-7 request object.
          * @param Psr7Response $response      A PSR-7 response object.
          * @param RequestException $exception A PSR-7 exception object.
@@ -59,11 +62,11 @@ class Retry
          * phpcs:disable Generic.Functions.OpeningFunctionBraceBsdAllman.BraceOnSameLine
          */
         return static function (
-            $retries,
+            int $retries,
             Psr7Request $request,
             Psr7Response $response = null,
             RequestException $exception = null
-        ) use ($logger, $maxRetries) {
+        ) use ($logger, $maxRetries): bool {
             // phpcs:enable
 
             if ($retries >= $maxRetries) {
@@ -81,8 +84,12 @@ class Retry
                 $retries + 1,
                 $maxRetries,
                 $response
-                    ? 'status code: ' . $response->getStatusCode()
-                    : $exception->getMessage()
+                    ? \sprintf('status code: %d', $response->getStatusCode())
+                    : (
+                        $exception instanceof Exception
+                            ? $exception->getMessage()
+                            : ''
+                    )
             ), [
                 ($request->getHeader('Host')[0] ?? $request->getHeader('Host')),
             ]);

@@ -19,6 +19,8 @@ class EffectiveUri
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -53,8 +55,8 @@ class EffectiveUri
                 if ($sourceUri !== $effectiveUri) {
                     $logger->notice(\sprintf(
                         'Source URI has been updated from "%s" → "%s".',
-                        $sourceUri,
-                        $effectiveUri
+                        (string) $sourceUri,
+                        (string) $effectiveUri
                     ));
 
                     $sourceUri = $effectiveUri;

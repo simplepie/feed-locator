@@ -34,12 +34,12 @@ class Html extends AbstractParser
      * @param StreamInterface $stream A PSR-7 `StreamInterface` which is typically returned by
      *                                the `getBody()` method of a `ResponseInterface` class.
      * @param LoggerInterface $logger The PSR-3 logger.
-     * @param int             $libxml The libxml value to use for parsing XML.
+     * @param int|null        $libxml The libxml value to use for parsing XML.
      *
      * @throws Error
      * @throws TypeError
      */
-    public function __construct(StreamInterface $stream, LoggerInterface $logger, int $libxml = null)
+    public function __construct(StreamInterface $stream, LoggerInterface $logger, ?int $libxml = null)
     {
         // Logger
         $this->logger = $logger;

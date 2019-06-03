@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<psalm
+    addParamDefaultToDocblockType="true"
+    allowCoercionFromStringToClassConst="false"
+    allowPhpStormGenerics="false"
+    allowStringToStandInForClass="false"
+    checkForThrowsDocblock="true"
+    checkForThrowsInGlobalScope="false"
+    hoistConstants="false"
+    ignoreInternalFunctionFalseReturn="true"
+    ignoreInternalFunctionNullReturn="true"
+    memoizeMethodCallResults="true"
+    rememberPropertyAssignmentsAfterCall="true"
+    requireVoidReturnType="false"
+    strictBinaryOperands="true"
+    totallyTyped="true"
+    useAssertForType="true"
+    useDocblockPropertyTypes="true"
+    useDocblockTypes="true"
+    usePhpDocMethodsWithoutMagicCall="false"
+
+    allowFileIncludes="true"
+    hideExternalErrors="false"
+    throwExceptionOnError="false"
+
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+>
+    <projectFiles>
+        <directory name="src" />
+        <ignoreFiles>
+            <directory name="vendor/" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <LessSpecificReturnType errorLevel="info" />
+        <PossiblyUnusedMethod errorLevel="suppress" />
+    </issueHandlers>
+</psalm>

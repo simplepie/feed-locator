@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace FeedLocator\Http;
 
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -17,6 +18,8 @@ class Middleware
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -28,10 +31,28 @@ class Middleware
      */
     public static function saveEffectiveUri(): callable
     {
-        return static function (callable $handler) {
-            return static function (RequestInterface $request, array $options) use ($handler) {
-                return $handler($request, $options)->then(static function (ResponseInterface $response) use ($request) {
-                    return $response->withHeader('X-Effective-URI', $request->getUri());
+        return static function (callable $handler): callable {
+            /**
+             * @var callable
+             *
+             * @psalm-suppress MixedInferredReturnType
+             */
+            return static function (RequestInterface $request, array $options) use ($handler): PromiseInterface {
+                /**
+                 * @var PromiseInterface
+                 *
+                 * @psalm-suppress MixedReturnStatement
+                 * @psalm-suppress MixedMethodCall
+                 *
+                 * phpcs:disable Generic.Files.LineLength.MaxExceeded
+                 */
+                return $handler($request, $options)->then(static function (ResponseInterface $response) use ($request): ResponseInterface {
+                    // phpcs:enable
+
+                    /**
+                     * @var ResponseInterface
+                     */
+                    return $response->withHeader('X-Effective-URI', (string) $request->getUri());
                 });
             };
         };

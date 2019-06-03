@@ -21,6 +21,8 @@ class Status
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {

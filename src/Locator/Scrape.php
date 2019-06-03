@@ -33,6 +33,8 @@ class Scrape
 
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -75,7 +77,7 @@ class Scrape
             $logger->debug(\sprintf(
                 'The closure from `%s` is running in %s mode.',
                 __CLASS__,
-                static::getModePhrase($mode)
+                (static::getModePhrase($mode) ?? '')
             ));
 
             $parser = new HtmlParser($response->getBody(), $logger);
@@ -89,7 +91,7 @@ class Scrape
                 $effectiveUri->getHost()
             );
 
-            $query   = static::formatQuery(static::feedKeywords(), $sourceUri, $effectiveHost, $mode);
+            $query   = static::formatQuery(static::feedKeywords(), (string) $sourceUri, (string) $effectiveHost, $mode);
             $results = $parser->xpath()->query($query);
 
             $logger->debug($query, [
@@ -97,7 +99,7 @@ class Scrape
             ]);
 
             // Determine the root-level domain of the starting URI
-            $sourceHost     = new Uri($sourceUri);
+            $sourceHost     = new Uri((string) $sourceUri);
             $sourceRootHost = static::parseHost($sourceHost->getHost());
 
             foreach ($results as $result) {
@@ -169,7 +171,7 @@ class Scrape
                 : static::xpathRootDomain($shost);
         }
 
-        $include = \array_merge($include, \array_map(static function ($e) {
+        $include = \array_merge($include, \array_map(static function (string $e) {
             return \sprintf('contains(@href, "%s")', $e);
         }, $keywords));
 
@@ -186,6 +188,8 @@ class Scrape
      * Parse the hostname to identify the root-level domain name.
      *
      * @param string $host The current host of the URI being parsed.
+     *
+     * @throws FeedLocatorException
      */
     public static function parseHost(string $host): string
     {
@@ -224,6 +228,8 @@ class Scrape
      * A variable portion of the XPath 1.0 query used when identifying the same root-level domain name.
      *
      * @param Uri $host The current host of the URI being parsed.
+     *
+     * @throws FeedLocatorException
      */
     public static function xpathRootDomain(Uri $host): string
     {

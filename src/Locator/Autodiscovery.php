@@ -28,6 +28,8 @@ class Autodiscovery
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -195,14 +197,14 @@ class Autodiscovery
     /**
      * Generates the proper XPath 1.0 format for excluding certain keywords.
      *
-     * @param iterable ...$formats A variadic argument for the formats for which you want to generate valid XPath 1.0.
+     * @param array ...$formats A variadic argument for the formats for which you want to generate valid XPath 1.0.
      */
-    public static function formatIncludeAsXpath(...$formats): string
+    public static function formatIncludeAsXpath(array ...$formats): string
     {
         $include = [];
 
         foreach ($formats as $format) {
-            $include = \array_merge($include, \array_map(static function ($e) {
+            $include = \array_merge($include, \array_map(static function (string $e) {
                 return \sprintf('contains(@type, "%s")', $e);
             }, $format));
         }

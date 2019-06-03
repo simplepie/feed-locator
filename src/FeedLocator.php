@@ -18,6 +18,7 @@ use FeedLocator\Locator\Status;
 use FeedLocator\Locator\ValidFeed;
 use FeedLocator\Mixin as Tr;
 use GuzzleHttp\Promise as func;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Log\NullLogger;
 use SimplePie\UtilityPack\Mixin as UpTr;
 
@@ -31,6 +32,11 @@ class FeedLocator
     use Tr\GuzzleClientTrait;
     use UpTr\LoggerTrait;
 
+    /**
+     * The number of possible feeds discovered.
+     *
+     * @var int
+     */
     public $count = 0;
 
     /**
@@ -50,7 +56,7 @@ class FeedLocator
     /**
      * The queue object which holds references to the work tasks which still need to be performed.
      *
-     * @var ArrayIterator
+     * @var Queue
      */
     protected $queue;
 
@@ -71,9 +77,7 @@ class FeedLocator
     /**
      * Constructs a new instance of this class.
      *
-     * @param string   $uri         The URI on which to begin the auto-discovery scanning.
-     * @param int|null $concurrency The number of parallel threads to use. Should be equal to, or fewer than, the
-     *                              number of CPU cores running the code.
+     * @param string $uri The URI on which to begin the auto-discovery scanning.
      */
     public function __construct(string $uri, int $concurrency = 5)
     {
@@ -82,12 +86,15 @@ class FeedLocator
         $this->results     = new ArrayIterator();
         $this->sourceUri   = $uri;
         $this->firstSource = true;
-        $this->queue       = $this->queueFor($this->sourceUri);
+        $this->queue       = $this->queueFor([$this->sourceUri]);
     }
 
-    public function run()
+    /**
+     * Run the parser.
+     */
+    public function run(): PromiseInterface
     {
-        $handler = function (string $uri, Queue $queue) {
+        $handler = function (string $uri, Queue $queue): PromiseInterface {
             return $this->client->getAsync($uri)
                 ->then(EffectiveUri::parse($this->sourceUri, $this->firstSource, $this->logger))
                 ->then(ValidFeed::parse($uri, $queue, $this->logger, $this->results))
@@ -117,6 +124,10 @@ class FeedLocator
      */
     protected static function handleReject(): callable
     {
+        /**
+         * @psalm-suppress UnusedClosureParam
+         * @psalm-suppress UnusedMethod
+         */
         return static function (string $reason): void {
         };
     }
@@ -126,7 +137,7 @@ class FeedLocator
      *
      * @param iterable $value The iterable object to wrap into a Queue object.
      */
-    protected function queueFor($value): Queue
+    protected function queueFor(iterable $value): Queue
     {
         if ($value instanceof Queue) {
             return $value;

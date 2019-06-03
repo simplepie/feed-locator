@@ -20,6 +20,8 @@ class DefaultConfig
 {
     /**
      * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
      */
     private function __construct()
     {
@@ -30,7 +32,7 @@ class DefaultConfig
      * Default HandlerStack with pre-included middleware.
      *
      * @param LoggerInterface $logger      An instantiated PSR-3 logger object.
-     * @param iterable        ...$handlers A variadic argument for the handlers which you want to
+     * @param callable        ...$handlers A variadic argument for the handlers which you want to
      *                                     apply to the HandlerStack.
      */
     public static function handlerStack(LoggerInterface $logger, callable ...$handlers): HandlerStack
@@ -59,7 +61,7 @@ class DefaultConfig
     public static function statsHandler(LoggerInterface $logger): callable
     {
         return static function (TransferStats $stats) use ($logger): void {
-            $logger->info($stats->getEffectiveUri(), [
+            $logger->info((string) $stats->getEffectiveUri(), [
                 'time'       => $stats->getTransferTime(),
                 'mem_script' => Bytes::format(\memory_get_usage()),
                 'mem_zend'   => Bytes::format(\memory_get_usage(true)),

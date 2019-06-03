@@ -14,6 +14,11 @@ use Psr\Http\Message\ResponseInterface;
 
 abstract class AbstractValidator
 {
+    /**
+     * Constructs a new instance of this class.
+     *
+     * @psalm-suppress UnusedMethod
+     */
     private function __construct()
     {
         // Do not instantiate.
@@ -57,6 +62,6 @@ abstract class AbstractValidator
         $contentType = $response->getHeader('content-type');
         $contentType = \end($contentType);
 
-        return (bool) \preg_match($regex, $firstBits);
+        return (bool) \preg_match($regex, $contentType);
     }
 }
