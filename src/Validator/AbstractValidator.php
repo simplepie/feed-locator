@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace FeedLocator\Validator;
 
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 
 abstract class AbstractValidator
 {
@@ -32,15 +33,21 @@ abstract class AbstractValidator
      *                                     positively-identify a feed.
      * @param int               $readBytes The number of bytes to read from the beginning of the
      *                                     document in order to apply the regex.
+     *
+     * @throws RuntimeException
      */
     public static function scanBodyFor(ResponseInterface $response, string $regex, int $readBytes): bool
     {
         /** @var \Psr\Http\Message\StreamInterface */
         $body = $response->getBody();
 
-        /** @var string */
-        $firstBits = $body->read($readBytes);
-        $body->rewind();
+        try {
+            /** @var string */
+            $firstBits = $body->read($readBytes);
+            $body->rewind();
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
 
         // echo '--------------------------------------------------------------------------' . \PHP_EOL;
         // echo $response->getStatusCode() . \PHP_EOL;

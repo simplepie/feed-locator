@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace FeedLocator\Validator;
 
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 
 /**
  * Validates whether or not a response is a valid type of feed.
@@ -19,6 +20,8 @@ class AtomValidator extends AbstractValidator implements ValidatorInterface
 {
     /**
      * {@inheritdoc}
+     *
+     * @throws RuntimeException
      */
     public static function isFeed(ResponseInterface $response, bool $contentSniffing = true): bool
     {
