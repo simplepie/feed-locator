@@ -527,3 +527,4 @@ return Config::create()
     ->setFinder($finder)
     ->setUsingCache(true)
 ;
+
